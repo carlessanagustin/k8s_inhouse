@@ -1,0 +1,56 @@
+---
+- hosts: all
+  vars:
+    GSERVER: 'gserver'
+    #GSERVER_IP: 10.132.0.XX
+  tasks:
+    - name: Debian - install glusterfs client
+      when: ansible_os_family == "Debian"
+      become: yes
+      apt:
+        package: glusterfs-client
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: delete old /etc/hosts entries
+      lineinfile:
+        path: /etc/hosts
+        state: absent
+        regexp: '{{ GSERVER }}'
+
+    - name: adding gluster server to /etc/hosts
+      become: yes
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^{{ GSERVER_IP }}'
+        line: '{{ GSERVER_IP }}    {{ GSERVER }}'
+
+- hosts: gluster
+  tasks:
+    - name: Debian - install glusterfs server
+      when: ansible_os_family == "Debian"
+      become: yes
+      apt:
+        package: glusterfs-server
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Configuring gluster server
+      become: yes
+      tags: test
+      when: false
+      shell: "{{ item}}"
+      loop:
+        - 'sed -i "s|^127.0.0.1.*|& $GSERVER|m" /etc/hosts'
+        - 'mkdir -p $S_FOLDER'
+        - 'gluster volume create $GNAME $GSERVER:$S_FOLDER force'
+        - 'gluster volume start $GNAME'
+        - 'echo "This is a GLUSTERFS test" > $S_FOLDER/index.html'
+      environment:
+        S_FOLDER: '/data/k8'
+        GNAME: 'gfs'
+        GSERVER: 'gserver'
+
+# test: sudo mkdir -p /data/k8 && sudo mount -t glusterfs gserver:/gfs /data/k8

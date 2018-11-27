@@ -1,0 +1,24 @@
+[gluster]
+gluster1  ansible_host=
+
+[haproxy]
+haproxy1 ansible_host=
+
+[masters]
+master1  ansible_host=
+
+[workers]
+worker1  ansible_host=
+worker2  ansible_host=
+
+[k8s:children]
+masters
+workers
+
+[all:vars]
+ansible_user=
+ansible_ssh_private_key_file=
+
+; api_advertise='--apiserver-advertise-address=10.132.0.14'
+
+GSERVER_IP=

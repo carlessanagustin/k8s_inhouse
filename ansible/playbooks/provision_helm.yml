@@ -1,0 +1,47 @@
+---
+- hosts: masters
+  vars:
+    # releases: https://github.com/helm/helm/releases
+    HELM_REPO: https://storage.googleapis.com/kubernetes-helm
+    HELM_PKG: helm-v2.11.0-linux-amd64.tar.gz
+    HELM: true
+  tasks:
+    - name: Debian - install requirements
+      when: ansible_os_family == "Debian"
+      become: yes
+      apt:
+        package: "{{ item}}"
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+      loop:
+        - wget
+
+    - name: Deploy Helm bin
+      shell: "{{ item}}"
+      loop:
+        - 'wget {{ HELM_REPO }}/{{ HELM_PKG }}'
+        - 'tar -zxvf {{ HELM_PKG }}'
+        - 'sudo cp linux-amd64/helm /usr/local/bin/'
+        - 'rm -f {{ HELM_PKG }}'
+        - 'rm -Rf linux-amd64'
+
+    - name: Setup Helm environment
+      when: HELM
+      tags: create_helm
+      shell: "{{ item}}"
+      loop:
+        - 'kubectl -n kube-system create serviceaccount tiller'
+        - 'kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller'
+        - 'helm init --service-account tiller --upgrade'
+        - 'helm repo update'
+
+    - name: Setup Helm environment
+      when: not HELM
+      tags: delete_helm
+      shell: "{{ item}}"
+      loop:
+        - 'kubectl -n kube-system delete deployment tiller-deploy'
+        - 'kubectl delete clusterrolebinding tiller'
+        - 'kubectl -n kube-system delete serviceaccount tiller'
+        - 'helm reset -f'

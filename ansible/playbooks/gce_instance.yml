@@ -1,0 +1,22 @@
+---
+- name: Create nodes
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  vars_files:
+    - ./private.yml
+  tasks:
+    - name: Launch nodes
+      gce:
+          instance_names: "{{ item.gce_instance_name }}"
+          machine_type: "{{ item.gce_machine_type }}"
+          image: "{{ gce_image }}"
+          disk_size: "{{ gce_disk_size }}"
+          project_id: "{{ gce_project_id }}"
+          tags: "{{ item.gce_tags | default(omit) }}"
+          zone: "{{ gce_zone }}"
+          state: present
+          service_account_email: "{{ gce_service_account_email }}"
+          credentials_file: "{{ gce_credentials_file }}"
+      register: gce_instance
+      loop: "{{ gce_nodes }}"

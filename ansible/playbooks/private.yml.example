@@ -1,0 +1,29 @@
+---
+# @gce_instance.yml
+
+## GCP service account must have roles: iam.serviceAccountUser + compute.admin
+
+gce_service_account_email:
+gce_credentials_file:
+gce_project_id:
+
+## 1. gce_machine_type...
+## Machine name - Virtual CPUs	- Memory (GB)
+## f1-micro - 0.2 - 0.60
+## g1-small - 0.5 - 1.70
+## n1-standard-1 - 1 - 3.75
+## n1-standard-2 - 2 - 7.50
+
+## 2. custom gce_machine_type... (experimental)
+## zones/[ZONE]/machineTypes/custom-NUMBER_OF_CPUS-AMOUNT_OF_MEMORY
+## zones/europe-west4-b/machineTypes/custom-4-8192
+
+gce_nodes:
+  - { gce_instance_name: '', gce_machine_type: '', gce_tags: ''}
+
+## gce_image...
+## ubuntu-1604
+## ubuntu-1404
+gce_image:
+gce_disk_size:
+gce_zone: 

@@ -1,0 +1,198 @@
+# https://www.digitalocean.com/community/tutorials/how-to-create-a-kubernetes-1-10-cluster-using-kubeadm-on-centos-7
+# https://kubernetes.io/docs/setup/independent/install-kubeadm/
+# https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
+
+---
+- hosts: all
+  become: yes
+  vars:
+    docker_compose_version: 1.23.1
+  tasks:
+    - name: RedHat - upgrade all packages
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: '*'
+        state: latest
+        update_cache: true
+
+    - name: Debian - upgrade all packages
+      when: ansible_os_family == "Debian"
+      apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+        force_apt_get: True
+
+    - name: RedHat - install requirements
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      loop:
+        - curl
+        - wget
+        - make
+        - jq
+        - git
+        - htop
+        - ansible
+        - conntrack
+
+    - name: Debian - install requirements
+      when: ansible_os_family == "Debian"
+      apt:
+        package: "{{ item }}"
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+      loop:
+        - apt-transport-https
+        - curl
+        - wget
+        - make
+        - jq
+        - git
+        - htop
+        - ansible
+        - conntrack
+
+    - name: RedHat - install Docker
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: docker
+        state: present
+        update_cache: true
+
+    - name: Debian - install Docker
+      when: ansible_os_family == "Debian"
+      apt:
+        package: docker.io
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: start Docker
+      service:
+        name: docker
+        state: restarted
+        enabled: yes
+
+    - name: install docker-compose
+      shell: "{{ item }}"
+      loop:
+        - 'curl -L "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose'
+        - 'chmod +x /usr/local/bin/docker-compose'
+
+- hosts: k8s
+  become: yes
+  vars:
+    k8s_version_Debian: 1.11.3-00
+    k8s_version_RedHat: 1.11.3
+  tasks:
+    - name: RedHat - disable SELinux
+      when: ansible_os_family == "RedHat"
+      command: setenforce 0
+
+    - name: RedHat - disable SELinux on reboot
+      when: ansible_os_family == "RedHat"
+      selinux:
+        state: disabled
+
+    - name: RedHat - add Kubernetes repository
+      when: ansible_os_family == "RedHat"
+      yum_repository:
+        name: Kubernetes
+        description: Kubernetes YUM repository
+        baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        gpgcheck: yes
+
+    - name: Debian - add Kubernetes key
+      when: ansible_os_family == "Debian"
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Debian - add Kubernetes repository
+      when: ansible_os_family == "Debian"
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: kubernetes
+        update_cache: yes
+
+    - name: RedHat - install kubelet
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: "kubelet={{ k8s_version_RedHat }}"
+        state: present
+        update_cache: true
+
+    - name: RedHat - install kubectl
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: "kubectl={{ k8s_version_RedHat }}"
+        state: present
+
+    - name: RedHat - install kubeadm
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: "kubeadm={{ k8s_version_RedHat }}"
+        state: present
+        update_cache: true
+
+    - name: Debian - install kubelet
+      when: ansible_os_family == "Debian"
+      apt:
+        package: "kubelet={{ k8s_version_Debian }}"
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Debian - install kubectl
+      when: ansible_os_family == "Debian"
+      apt:
+        package: "kubectl={{ k8s_version_Debian }}"
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Debian - install kubeadm
+      when: ansible_os_family == "Debian"
+      apt:
+        package: "kubeadm={{ k8s_version_Debian }}"
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: start kubelet
+      service:
+        name: kubelet
+        enabled: yes
+        state: started
+
+    - name: add user into docker group
+      shell: "usermod -aG docker {{ ansible_user }}"
+
+    - name: setup docker log
+      shell: "wget -O - https://goo.gl/nn7eWh | bash"
+
+    - name: apt-mark hold
+      shell: "apt-mark hold kubelet kubeadm kubectl"
+
+## apt-cache madison kubectl
+#- hosts: masters
+#  become: yes
+#  tasks:
+#    - name: RedHat - install kubectl
+#      when: ansible_os_family == "RedHat"
+#      yum:
+#        name: kubectl=1.11.3
+#        state: present
+#
+#    - name: Debian - install kubectl
+#      when: ansible_os_family == "Debian"
+#      apt:
+#        package: kubectl=1.11.3-00
+#        update_cache: yes
+#        cache_valid_time: 3600

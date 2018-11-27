@@ -1,0 +1,6 @@
+ARCHIVE
+*.log
+.vagrant
+*.retry
+private.yml
+ansible/inventory/gcp
