@@ -39,6 +39,7 @@
         - htop
         - ansible
         - conntrack
+        - bash-completion
 
     - name: Debian - install requirements
       when: ansible_os_family == "Debian"
@@ -57,6 +58,7 @@
         - htop
         - ansible
         - conntrack
+        - bash-completion
 
     - name: RedHat - install Docker
       when: ansible_os_family == "RedHat"

@@ -27,10 +27,11 @@
         line: '{{ GSERVER_IP }}    {{ GSERVER }}'
 
 - hosts: gluster
+  become: yes
   tasks:
     - name: Debian - install glusterfs server
+      tags: gluster
       when: ansible_os_family == "Debian"
-      become: yes
       apt:
         package: glusterfs-server
         state: latest
@@ -38,19 +39,24 @@
         cache_valid_time: 3600
 
     - name: Configuring gluster server
-      become: yes
-      tags: test
+      tags: gluster
+      shell: "{{ item}}"
+      loop:
+        - 'wget https://raw.githubusercontent.com/gluster/glusterfs/master/extras/command-completion/gluster.bash -P /etc/bash_completion.d'
+
+    - name: Configuring gluster server
+      tags: example
       when: false
       shell: "{{ item}}"
       loop:
         - 'sed -i "s|^127.0.0.1.*|& $GSERVER|m" /etc/hosts'
-        - 'mkdir -p $S_FOLDER'
-        - 'gluster volume create $GNAME $GSERVER:$S_FOLDER force'
-        - 'gluster volume start $GNAME'
-        - 'echo "This is a GLUSTERFS test" > $S_FOLDER/index.html'
+        - 'mkdir -p $GBRICK'
+        - 'gluster volume create $GVOLUME $GSERVER:$GBRICK force'
+        - 'gluster volume start $GVOLUME'
+        - 'echo "This is a GLUSTERFS test" > $GBRICK/index.html'
       environment:
-        S_FOLDER: '/data/k8'
-        GNAME: 'gfs'
+        GBRICK: '/data/k8'
+        GVOLUME: 'gfs'
         GSERVER: 'gserver'
 
 # test: sudo mkdir -p /data/k8 && sudo mount -t glusterfs gserver:/gfs /data/k8

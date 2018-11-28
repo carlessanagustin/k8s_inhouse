@@ -1,4 +1,4 @@
-# Deploy a Kubernetes in-house
+# Deploy a Kubernetes cluster in-house
 
 Deploy a Kubernetes cluster in-house. The idea of this Infrastructure as Code repo is to solve the installation of a Kubernetes cluster in-house with Ubuntu OS instances shared files and port forwarding.
 
