@@ -1,0 +1,50 @@
+---
+# CHART: create | delete
+# CHART_CONF: git | template
+- name: git - clone helm charts repo
+  tags: charts_git
+  when: CHART_CONF == "git" and CHART == "create"
+  git:
+    repo: "{{ item.git_repo }}"
+    dest: "{{ item.git_dest }}"
+    version: "{{ item.git_version | default('HEAD') }}"
+    clone: yes
+    update: yes
+    accept_hostkey: yes
+    force: yes
+  loop:
+    - { git_repo: 'https://github.com/carlessanagustin/charts.git', git_dest: 'helm_charts', git_version: 'HEAD' }
+
+- name: template - create helm folder
+  tags: charts_template
+  when: CHART_CONF == "template" and CHART == "create"
+  file:
+    path: template/tick
+    state: directory
+    mode: 0755
+
+- name: template -copy helm charts
+  tags: charts_template
+  when: CHART_CONF == "template" and CHART == "create"
+  template:
+    src: ../template/tick
+    dest: template/tick
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+
+- name: Create chart
+  tags: charts_create
+  when: CHART == "create"
+  shell: "{{ item}}"
+  loop: "{{ charts_create_loop }}"
+  #args:
+  #  chdir: helm_charts/stable/
+
+- name: Delete chart
+  tags: charts_delete
+  when: CHART == "delete"
+  shell: "{{ item}}"
+  ignore_errors: yes
+  loop: "{{ charts_delete }}"

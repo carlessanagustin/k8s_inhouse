@@ -1,0 +1,18 @@
+---
+- hosts: masters
+  environment:
+    INGRESS_NS: ingress
+    INGRESS_VERSION: "--version v0.31.0"
+    INGRESS_NAME: ingress
+  vars:
+    TICK: create
+    TICK_CONF: git
+    charts_create_loop:
+      - 'kubectl create ns $INGRESS_NS'
+      - 'helm install --name $INGRESS_NAME -n $INGRESS_NS $INGRESS_VERSION -f helm_charts/stable/nginx-ingress/values.yaml stable/nginx-ingress'
+    charts_delete:
+      - 'helm delete --purge $INGRESS_NAME'
+      - 'kubectl delete ns $INGRESS_NS'
+  tasks:
+    - name: include charts task list in play
+      include_tasks: ./provision_charts_tasks.yml

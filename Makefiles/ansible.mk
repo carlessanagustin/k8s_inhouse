@@ -47,15 +47,11 @@ provision_helm:
 provision_tools:
 	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_tools.yml ${LIMIT} ${TAG} ${DEBUG}
 
-
-# TODO
 ####### ingress
 provision_ingress:
 	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_ingress.yml ${LIMIT} ${TAG} ${DEBUG}
 
-####### TICK
-provision_tick:
-	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_tick.yml ${LIMIT} ${TAG} ${DEBUG}
+
 
 
 
@@ -66,9 +62,3 @@ provision_k8s_rejoin: install_k8s setup_k8s_master setup_k8s_worker_rejoin
 
 setup_k8s_worker_rejoin:
 	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/setup_k8s_worker.yml --extra-vars UNJOIN=true ${LIMIT} ${TAG} ${DEBUG}
-
-
-## DEPRECATED ###############################################
-####### worldsensing actions
-deploy_code:
-	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/deploy_code.yml ${LIMIT} ${TAG} ${DEBUG}
