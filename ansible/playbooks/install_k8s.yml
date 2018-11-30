@@ -40,6 +40,9 @@
         - ansible
         - conntrack
         - bash-completion
+        - build-essential
+        - python-pip
+        - python-virtualenv
 
     - name: Debian - install requirements
       when: ansible_os_family == "Debian"
@@ -59,6 +62,9 @@
         - ansible
         - conntrack
         - bash-completion
+        - build-essential
+        - python-pip
+        - python-virtualenv
 
     - name: RedHat - install Docker
       when: ansible_os_family == "RedHat"
