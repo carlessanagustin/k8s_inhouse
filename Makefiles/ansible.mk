@@ -51,6 +51,9 @@ provision_tools:
 provision_ingress:
 	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_ingress.yml ${LIMIT} ${TAG} ${DEBUG}
 
+####### telegraf
+provision_telegraf:
+	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_telegraf.yml ${LIMIT} ${TAG} ${DEBUG}
 
 
 

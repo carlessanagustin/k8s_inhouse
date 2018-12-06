@@ -1,0 +1,58 @@
+---
+- hosts:
+    - masters
+    - gluster
+    - haproxy
+  vars:
+    TELEGRAF_URL: "https://raw.githubusercontent.com/carlessanagustin/TICK-docker/c395a70072eef52441d11b67d515c54c19511ffe/build/telegraf/install_telegraf_Ubuntu.sh"
+    INFLUX_SVC: influxdb-external
+    INFLUX_IP: 10.132.0.2
+  tasks:
+    - name: install telegraf
+      tags: telegraf
+      become: yes
+      shell: "wget -O - {{ TELEGRAF_URL }} | bash"
+
+    - name: add telegraf user to docker group
+      tags: telegraf
+      become: yes
+      shell: usermod -aG docker telegraf
+
+    - name: read /etc/hosts
+      tags:
+        - telegraf
+        - etc_hosts
+      become: yes
+      shell: cat /etc/hosts
+      register: etc_hosts
+
+    - name: adding influxdb into /etc/hosts if needed
+      tags:
+        - telegraf
+        - etc_hosts
+      become: yes
+      when: etc_hosts.stdout.find(INFLUX_SVC) == -1
+      lineinfile:
+        path: /etc/hosts
+        line: '{{ INFLUX_IP }}    {{ INFLUX_SVC }}'
+
+    - name: copy conf to remote
+      tags: telegraf
+      become: yes
+      template:
+        src: ../template/telegraf.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: systemctl restart telegraf
+      tags:
+        - telegraf
+        - etc_hosts
+      become: yes
+      systemd:
+        name: telegraf
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
