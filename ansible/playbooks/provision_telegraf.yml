@@ -1,8 +1,5 @@
 ---
-- hosts:
-    - masters
-    - gluster
-    - haproxy
+- hosts: telegraf
   vars:
     TELEGRAF_URL: "https://raw.githubusercontent.com/carlessanagustin/TICK-docker/c395a70072eef52441d11b67d515c54c19511ffe/build/telegraf/install_telegraf_Ubuntu.sh"
     INFLUX_SVC: influxdb-external
@@ -40,16 +37,66 @@
       tags: telegraf
       become: yes
       template:
-        src: ../template/telegraf.conf
+        src: ../template/telegraf/telegraf.conf
         dest: /etc/telegraf/telegraf.conf
         owner: root
         group: root
         mode: 0644
 
+    - name: copy *.conf to remote
+      tags:
+        - telegraf
+        - now
+      become: yes
+      template:
+        src: "../template/telegraf/{{ item.filename }}"
+        dest: "/etc/telegraf/telegraf.d/{{ item.new_filename | default(item.filename) }}"
+        owner: root
+        group: root
+        mode: 0644
+      loop:
+        - { filename: 'filestat.conf' }
+
+- hosts: telegraf_docker
+  tasks:
+    - name: copy docker.conf to remote
+      tags:
+        - telegraf
+        - docker
+      become: yes
+      template:
+        src: ../template/telegraf/docker.conf
+        dest: /etc/telegraf/telegraf.d/docker.conf
+        owner: root
+        group: root
+        mode: 0644
+
+- hosts: telegraf_haproxy
+  vars:
+    HAPROXY_URL: https://admin:admin-1234@localhost:4443/haproxy?stats
+  tasks:
+    - name: copy haproxy.conf to remote
+      tags:
+        - telegraf
+        - haproxy
+      become: yes
+      template:
+        src: ../template/telegraf/haproxy.conf
+        dest: /etc/telegraf/telegraf.d/haproxy.conf
+        owner: root
+        group: root
+        mode: 0644
+
+- hosts: telegraf
+  tasks:
     - name: systemctl restart telegraf
       tags:
         - telegraf
         - etc_hosts
+        - haproxy
+        - docker
+        - restart
+        - now
       become: yes
       systemd:
         name: telegraf
