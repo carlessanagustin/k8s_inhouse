@@ -15,10 +15,21 @@
         - "sudo chmod +x /usr/local/bin/kustomize"
         - "curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash"
 
+
+    - name: create ark installation path
+      tags:
+        - ark
+      file:
+        path: ark
+        state: directory
+        mode: 0775
+
     - name: install ark tool
       tags:
         - ark
       shell: "{{ item}}"
+      args:
+        chdir: ark
       loop:
         - "mkdir -p ./ark && cd ./ark"
         - "wget https://github.com/heptio/ark/releases/download/v0.10.0/ark-v0.10.0-linux-amd64.tar.gz"
