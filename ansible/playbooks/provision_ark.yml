@@ -1,0 +1,34 @@
+---
+- hosts:
+    - masters
+  tasks:
+    - name: create ark installation path
+      tags:
+        - ark
+      file:
+        path: ark
+        state: directory
+        mode: 0775
+
+    - name: install ark tool
+      tags:
+        - ark
+      shell: "{{ item}}"
+      args:
+        chdir: ark
+      loop:
+        - "mkdir -p ./ark && cd ./ark"
+        - "wget https://github.com/heptio/ark/releases/download/v0.10.0/ark-v0.10.0-linux-amd64.tar.gz"
+        - "tar zxvf ark-v0.10.0-linux-amd64.tar.gz "
+        - "sudo cp ark /usr/local/bin"
+        - "sudo chown root:root /usr/local/bin/*"
+        - "source <(ark completion bash)"
+        - "kubectl create -f https://raw.githubusercontent.com/heptio/ark/master/examples/common/00-prereqs.yaml"
+        #- "kubectl create ns heptio-ark"
+        #- "ark server"
+
+# cd ./ark/config/minio
+# kubectl create -f 00-minio-deployment.yaml
+# kubectl create -f 05-ark-backupstoragelocation.yaml
+# kubectl create -f 20-ark-deployment.yaml
+# kubectl create -f 30-restic-daemonset.yaml
