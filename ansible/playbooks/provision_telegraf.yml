@@ -33,8 +33,10 @@
         path: /etc/hosts
         line: '{{ INFLUX_IP }}    {{ INFLUX_SVC }}'
 
-    - name: copy conf to remote
-      tags: telegraf
+    - name: copy telegraf.conf to remote
+      tags:
+        - telegraf
+        - telegraf_conf
       become: yes
       template:
         src: ../template/telegraf/telegraf.conf
@@ -46,7 +48,6 @@
     - name: copy *.conf to remote
       tags:
         - telegraf
-        - now
       become: yes
       template:
         src: "../template/telegraf/{{ item.filename }}"
@@ -96,7 +97,6 @@
         - haproxy
         - docker
         - restart
-        - now
       become: yes
       systemd:
         name: telegraf
