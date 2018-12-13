@@ -1,34 +1,40 @@
 ---
-- hosts:
+- name: "Install back up & restore Heptio Ark tool"
+  hosts:
     - masters
+  vars:
+    INSTALL_DIR: ark-install
   tasks:
     - name: create ark installation path
       tags:
         - ark
       file:
-        path: ark
+        path: "{{ INSTALL_DIR }}"
         state: directory
         mode: 0775
 
-    - name: install ark tool
+    - name: "Installing the Ark Client"
       tags:
         - ark
+        - client
       shell: "{{ item}}"
       args:
-        chdir: ark
+        chdir: "{{ INSTALL_DIR }}"
       loop:
-        - "mkdir -p ./ark && cd ./ark"
         - "wget https://github.com/heptio/ark/releases/download/v0.10.0/ark-v0.10.0-linux-amd64.tar.gz"
-        - "tar zxvf ark-v0.10.0-linux-amd64.tar.gz "
-        - "sudo cp ark /usr/local/bin"
-        - "sudo chown root:root /usr/local/bin/*"
-        - "source <(ark completion bash)"
-        - "kubectl create -f https://raw.githubusercontent.com/heptio/ark/master/examples/common/00-prereqs.yaml"
-        #- "kubectl create ns heptio-ark"
-        #- "ark server"
+        - "tar zxvf ark-v0.10.0-linux-amd64.tar.gz"
+        - "sudo mv -f ark /usr/local/bin"
+        - "sudo chown root:root /usr/local/bin/ark"
+        - "grep -q -F 'source <(ark completion bash)' ~/.bashrc || echo 'source <(ark completion bash)' >> ~/.bashrc"
+        - "rm -f ark-v0.10.0-linux-amd64.tar.gz"
 
-# cd ./ark/config/minio
-# kubectl create -f 00-minio-deployment.yaml
-# kubectl create -f 05-ark-backupstoragelocation.yaml
-# kubectl create -f 20-ark-deployment.yaml
-# kubectl create -f 30-restic-daemonset.yaml
+    - name: "Installing and Configuring the Ark Server"
+      tags:
+        - ark
+        - server
+      shell: "{{ item}}"
+      args:
+        chdir: "{{ INSTALL_DIR }}"
+      loop:
+        - "git clone https://github.com/heptio/ark.git"
+        # TODO: link

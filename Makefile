@@ -1,4 +1,4 @@
-include Makefiles/ansible.mk
+-include Makefiles/ansible.mk
 
 ## 1. create instances
 step1: gce_instances
