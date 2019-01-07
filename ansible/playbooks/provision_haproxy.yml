@@ -1,8 +1,6 @@
 ---
 - hosts:
     - haproxy
-  vars_files:
-    - ./private.yml
   tasks:
     - name: deploy haproxy to instances
       tags:
