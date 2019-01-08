@@ -85,6 +85,7 @@
         cache_valid_time: 3600
 
     - name: Run docker installation script
+      become: no
       tags: docker
       script: ../template/docker/install_dockerengine_Ubuntu.sh
       environment:
@@ -183,11 +184,9 @@
         update_cache: yes
         cache_valid_time: 3600
 
-# TODO
     - name: Disable SWAP
       tags: swap
       script: ../template/kubelet/swap_enabled.sh
-# TODO
 
     - name: start kubelet
       service:
@@ -203,20 +202,3 @@
 
     - name: apt-mark hold
       shell: "apt-mark hold kubelet kubeadm kubectl"
-
-## apt-cache madison kubectl
-#- hosts: masters
-#  become: yes
-#  tasks:
-#    - name: RedHat - install kubectl
-#      when: ansible_os_family == "RedHat"
-#      yum:
-#        name: kubectl=1.11.3
-#        state: present
-#
-#    - name: Debian - install kubectl
-#      when: ansible_os_family == "Debian"
-#      apt:
-#        package: kubectl=1.11.3-00
-#        update_cache: yes
-#        cache_valid_time: 3600

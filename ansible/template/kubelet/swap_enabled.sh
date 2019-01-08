@@ -5,6 +5,7 @@
 kubeadm_conf=/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 if [[ $(swapon | wc -l) -gt 1 ]] ;  then
   # echo "swap ON"
+
   kubeadm reset -f
 
   grep -q '^Environment="KUBELET_EXTRA_ARGS' $kubeadm_conf && \
