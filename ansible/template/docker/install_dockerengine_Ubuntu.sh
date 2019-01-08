@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
 # DOCKER_VERSION={{ docker_ce_version_Debian }}
+DOCKER_VERSION=17.03.3~ce-0~ubuntu-xenial
 # USER={{ docker_user }}
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
 
-# sudo apt-get -y remove docker-ce
+# sudo apt purge -y --auto-remove docker-ce
+# OR sudo apt-get -y remove --purge docker-ce
+
 sudo apt-get -y remove docker docker-engine docker.io
 sudo apt-get -y install apt-transport-https ca-certificates curl software-properties-common
 
