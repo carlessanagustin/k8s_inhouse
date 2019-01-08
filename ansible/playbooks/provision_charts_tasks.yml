@@ -13,7 +13,8 @@
     accept_hostkey: yes
     force: yes
   loop:
-    - { git_repo: 'https://github.com/carlessanagustin/charts.git', git_dest: 'helm_charts', git_version: 'HEAD' }
+    #- { git_repo: 'https://github.com/carlessanagustin/charts.git', git_dest: 'helm_charts', git_version: 'HEAD' }
+    - { git_repo: 'https://github.com/carlessanagustin/charts.git', git_dest: 'helm_charts', git_version: 'development' }
 
 - name: template - create helm folder
   tags: charts_template
@@ -23,7 +24,7 @@
     state: directory
     mode: 0755
 
-- name: template -copy helm charts
+- name: template - copy helm charts
   tags: charts_template
   when: CHART_CONF == "template" and CHART == "create"
   template:
