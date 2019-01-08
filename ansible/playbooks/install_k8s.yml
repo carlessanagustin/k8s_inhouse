@@ -75,7 +75,6 @@
         state: present
         update_cache: true
 
-# TODO
     - name: Debian - install Docker
       # when: ansible_os_family == "Debian"
       when: False
@@ -89,9 +88,8 @@
       tags: docker
       script: ../template/docker/install_dockerengine_Ubuntu.sh
       environment:
-        DOCKER_VERSION={{ docker_ce_version_Debian }}
-        # USER={{ docker_user }}
-# TODO
+        DOCKER_VERSION: "{{ docker_ce_version_Debian }}"
+        # USER: "{{ docker_user }}"
 
     - name: start Docker
       service:
@@ -184,6 +182,12 @@
         package: "kubeadm={{ k8s_version_Debian }}"
         update_cache: yes
         cache_valid_time: 3600
+
+# TODO
+    - name: Disable SWAP
+      tags: swap
+      script: ../template/kubelet/swap_enabled.sh
+# TODO
 
     - name: start kubelet
       service:
