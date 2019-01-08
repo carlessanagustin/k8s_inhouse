@@ -42,10 +42,13 @@
       shell: "{{ item }}"
       tags:
         - user_env
+      environment:
+        RC: ~/.bashrc
       loop:
         - "mkdir -p $HOME/.kube"
         - "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
         - "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+        - "grep -q '^source <(kubectl' $RC && sed -i 's/^source <(kubectl.*/source <(kubectl completion bash)/' $RC || echo 'source <(kubectl completion bash)' >> $RC"
 
     - name: flannel - deploy a pod network to the cluster
       when: pod_network == "flannel"
