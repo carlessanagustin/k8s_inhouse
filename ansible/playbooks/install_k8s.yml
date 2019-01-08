@@ -6,6 +6,8 @@
 - hosts: all
   become: yes
   vars:
+    docker_io_version_Debian: 17.03
+    docker_ce_version_Debian: 17.03.3~ce-0~ubuntu-xenial
     docker_compose_version: 1.23.1
   tasks:
     - name: RedHat - upgrade all packages
@@ -73,13 +75,23 @@
         state: present
         update_cache: true
 
+# TODO
     - name: Debian - install Docker
-      when: ansible_os_family == "Debian"
+      # when: ansible_os_family == "Debian"
+      when: False
       apt:
-        package: docker.io
-        state: latest
+        package: "docker.io={{ docker_io_version_Debian }}"
+        state: present
         update_cache: yes
         cache_valid_time: 3600
+
+    - name: Run docker installation script
+      tags: docker
+      script: ../template/docker/install_dockerengine_Ubuntu.sh
+      environment:
+        DOCKER_VERSION={{ docker_ce_version_Debian }}
+        # USER={{ docker_user }}
+# TODO
 
     - name: start Docker
       service:
