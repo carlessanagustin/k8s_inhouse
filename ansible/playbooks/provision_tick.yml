@@ -1,11 +1,13 @@
 ---
-- hosts:
+- name: TICK setup - gluster master
+  hosts:
     - gluster1
   vars:
     tick_gluster_create_loop:
-      - "make gluster_ready"
+      - "make requirements"
+      - "sudo make gluster_ready"
   tasks:
-    - name: deploy tick repo to master
+    - name: deploy tick repo to gluster node
       tags:
         - gluster
         - git
@@ -21,7 +23,6 @@
         - { git_repo: 'https://github.com/carlessanagustin/TICK-docker.git', git_dest: '~/tick', git_version: 'k8s' }
 
     - name: setup gluster
-      become: true
       tags:
         - gluster
       shell: "{{ item}}"
@@ -29,14 +30,17 @@
       args:
         chdir: ~/tick
 
-- hosts:
+- name: TICK setup - k8s master
+  hosts:
     - master1
   vars:
+    FQDN: 
     tick_k8s_create_loop:
       - "sed -i 's|ip: 10.132.0.8|ip: {{ GSERVER_IP }}|g' ./gluster-ep.yaml"
+      - "sed -i 's|example.com|{{ FQDN }}|g' ./chronograf-ingress.yaml"
       - "make create"
   tasks:
-    - name: deploy tick repo to master
+    - name: deploy tick repo to k8s master node
       tags:
         - tick
         - git
