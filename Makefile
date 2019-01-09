@@ -20,7 +20,7 @@ step4: provision_haproxy
 # change `@haproxy$ sudo vim haproxy.cfg` with worker IPs from `@master$ kubectl get nodes`
 # run: `@haproxy$ sudo make up`
 
-install: step2 step3 step4 provision_helm provision_tools provision_ingress provision_ark
+install: step2 step3 step4 provision_helm provision_tools provision_ingress provision_tick provision_ark
 
 
 

@@ -52,6 +52,10 @@ provision_tools:
 provision_ingress:
 	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_ingress.yml ${LIMIT} ${TAG} ${DEBUG} ${ASK_PASS}
 
+####### tick
+provision_tick:
+	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_tick.yml ${LIMIT} ${TAG} ${DEBUG} ${ASK_PASS}
+
 ####### telegraf
 provision_telegraf:
 	ansible-playbook -i ${INVENTORY} ${ANSIBLE_FOLDER}/provision_telegraf.yml ${LIMIT} ${TAG} ${DEBUG} ${ASK_PASS}
