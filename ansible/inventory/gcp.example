@@ -18,8 +18,10 @@ workers
 [all:vars]
 ansible_user=
 ansible_ssh_private_key_file=
+; ansible_ssh_pass=
+
 GSERVER_IP=
-; api_advertise='--apiserver-advertise-address=10.132.0.14'
+; api_advertise='--apiserver-advertise-address=10.132.0.14 --ignore-preflight-errors Swap'
 
 
 [telegraf_docker:children]

@@ -1,8 +1,38 @@
 ---
 - hosts:
-    - masters
+    - gluster1
   vars:
-    tick_create_loop:
+    tick_gluster_create_loop:
+      - "make gluster_ready"
+  tasks:
+    - name: deploy tick repo to master
+      tags:
+        - gluster
+        - git
+      git:
+        repo: "{{ item.git_repo }}"
+        dest: "{{ item.git_dest }}"
+        version: "{{ item.git_version | default('HEAD') }}"
+        clone: yes
+        update: yes
+        accept_hostkey: yes
+        force: yes
+      loop:
+        - { git_repo: 'https://github.com/carlessanagustin/TICK-docker.git', git_dest: '~/tick', git_version: 'k8s' }
+
+    - name: setup gluster
+      become: true
+      tags:
+        - gluster
+      shell: "{{ item}}"
+      loop: "{{ tick_gluster_create_loop }}"
+      args:
+        chdir: ~/tick
+
+- hosts:
+    - master1
+  vars:
+    tick_k8s_create_loop:
       - "sed -i 's|ip: 10.132.0.8|ip: {{ GSERVER_IP }}|g' ./gluster-ep.yaml"
       - "make create"
   tasks:
@@ -25,6 +55,6 @@
       tags:
         - tick
       shell: "{{ item}}"
-      loop: "{{ tick_create_loop }}"
+      loop: "{{ tick_k8s_create_loop }}"
       args:
         chdir: ~/tick/k8s
